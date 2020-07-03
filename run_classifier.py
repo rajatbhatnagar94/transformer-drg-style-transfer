@@ -103,7 +103,8 @@ class DataProcessor(object):
     def _read_csv(cls, input_file, quotechar=None):
         """Reads a coma separated value file."""
         with open(input_file, "r") as f:
-            reader = csv.reader(f, quotechar=quotechar,delimiter="\t")
+            reader = csv.reader(f, quotechar=quotechar,delimiter=",")
+            next(reader)
             lines = []
             for line in reader:
                 if sys.version_info[0] == 2:
@@ -123,15 +124,15 @@ class YelpProcessor(DataProcessor):
 
     def get_labels(self):
         """Gets the list of labels for this data set."""
-        return ["0","1"]
+        return ['0','1']
     def _create_examples(self, lines, set_type):
         """ Creates examples for the training and dev sets. CSV is prepared to have 1st column as data
          and 2nd column as label. """
         examples = []
         for i, line in enumerate(lines):
-            guid = "{}-{}".format(set_type, i)
-            text_a = line[0]
-            label = line[1]
+            guid = "{}-{}".format(set_type, line[1])
+            text_a = line[3]
+            label = line[2]
             examples.append(InputExample(guid=guid, text_a= text_a, label=label))
         return examples
 
@@ -347,14 +348,17 @@ def main():
     }
 
     if args.local_rank == -1 or args.no_cuda:
-        device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
+        device = torch.device("cuda:1" if torch.cuda.is_available() and not args.no_cuda else "cpu")
         n_gpu = torch.cuda.device_count()
+        n_gpu = 1
+        print("yooooooooooooooooooooooooooooooooooooo", n_gpu)
     else:
         torch.cuda.set_device(args.local_rank)
-        device = torch.device("cuda", args.local_rank)
+        device = torch.device("cuda:1", args.local_rank)
         n_gpu = 1
         # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
         torch.distributed.init_process_group(backend='nccl')
+        print("yodoasdfosdfsdfklsdfjsldfjsf dsdf lskdjf sldkjf sldkjfsldfs df")
     logger.info("device: {} n_gpu: {}, distributed training: {}, 16-bits training: {}".format(
         device, n_gpu, bool(args.local_rank != -1), args.fp16))
 
